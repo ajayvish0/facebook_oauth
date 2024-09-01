@@ -5,10 +5,14 @@ import mkcert from "vite-plugin-mkcert";
 
 export default defineConfig({
   plugins: [react(), mkcert()],
-
-  server: {
-    https: true,
-    host: "localhost",
-    port: 3000,
+  build: {
+    outDir: "dist",
   },
+  publicDir: "public",
+
+  // server: {
+  //   https: true,
+  //   host: "localhost",
+  //   port: 3000,
+  // },
 });
