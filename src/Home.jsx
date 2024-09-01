@@ -13,7 +13,7 @@ const Home = ({ setIsAuthenticated }) => {
   const [pageStats, setPageStats] = useState({});
 
   const apiKey = `"${import.meta.env.VITE_FACEBOOK_APP_ID.trim()}"`;
-  console.log(apiKey);
+
   const fetchUserData = useCallback(() => {
     window.FB.api("/me", { fields: "name,email,picture" }, function (response) {
       if (response && !response.error) {

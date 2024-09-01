@@ -6,12 +6,13 @@ const SignIn = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const apiKey = `"${import.meta.env.VITE_FACEBOOK_APP_ID.trim()}"`;
 
   useEffect(() => {
     const initFacebookSDK = () => {
       window.fbAsyncInit = function () {
         window.FB.init({
-          appId: "1056001626113009", // Replace with your Facebook App ID
+          appId: apiKey,
           cookie: true,
           xfbml: true,
           version: "v20.0",
