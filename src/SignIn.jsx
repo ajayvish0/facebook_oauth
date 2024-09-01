@@ -1,65 +1,30 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
+import { useFacebookSDK } from "./useFacebookSDK";
 
 const SignIn = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isFBInitialized, setIsFBInitialized] = useState(false);
   const navigate = useNavigate();
-  const apiKey = `"${import.meta.env.VITE_FACEBOOK_APP_ID.trim()}"`;
+  const isFBInitialized = useFacebookSDK();
+
   useEffect(() => {
-    const initFacebook = async () => {
-      try {
-        await loadFacebookSDK();
-        setIsFBInitialized(true);
-        checkLoginStatus();
-      } catch (error) {
-        setError("Failed to initialize Facebook SDK");
-        setIsLoading(false);
-      }
-    };
-
-    initFacebook();
-  }, []);
-  const loadFacebookSDK = () => {
-    return new Promise((resolve) => {
-      window.fbAsyncInit = function () {
-        window.FB.init({
-          appId: apiKey,
-          cookie: true,
-          xfbml: true,
-          version: "v20.0",
-        });
-        resolve();
-      };
-
-      (function (d, s, id) {
-        var js,
-          fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s);
-        js.id = id;
-        js.src = "https://connect.facebook.net/en_US/sdk.js";
-        fjs.parentNode.insertBefore(js, fjs);
-      })(document, "script", "facebook-jssdk");
-    });
-  };
-  const checkLoginStatus = () => {
-    if (window.FB) {
-      window.FB.getLoginStatus(function (response) {
-        if (response.status === "connected") {
-          setIsLoggedIn(true);
-          navigate("/");
-        } else {
-          setIsLoggedIn(false);
-        }
-        setIsLoading(false);
-      });
-    } else {
-      setError("Facebook SDK not loaded");
-      setIsLoading(false);
+    if (isFBInitialized) {
+      checkLoginStatus();
     }
+  }, [isFBInitialized]);
+
+  const checkLoginStatus = () => {
+    window.FB.getLoginStatus(function (response) {
+      if (response.status === "connected") {
+        setIsLoggedIn(true);
+        navigate("/");
+      } else {
+        setIsLoggedIn(false);
+      }
+      setIsLoading(false);
+    });
   };
 
   const handleLogin = () => {
