@@ -4,7 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import SignIn from "./Signin";
+import SignIn from "./SignIn";
 import Home from "./Home";
 import { useEffect, useState } from "react";
 
