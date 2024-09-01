@@ -5,11 +5,25 @@ const SignIn = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFBInitialized, setIsFBInitialized] = useState(false);
   const navigate = useNavigate();
   const apiKey = `"${import.meta.env.VITE_FACEBOOK_APP_ID.trim()}"`;
-
   useEffect(() => {
-    const initFacebookSDK = () => {
+    const initFacebook = async () => {
+      try {
+        await loadFacebookSDK();
+        setIsFBInitialized(true);
+        checkLoginStatus();
+      } catch (error) {
+        setError("Failed to initialize Facebook SDK");
+        setIsLoading(false);
+      }
+    };
+
+    initFacebook();
+  }, []);
+  const loadFacebookSDK = () => {
+    return new Promise((resolve) => {
       window.fbAsyncInit = function () {
         window.FB.init({
           appId: apiKey,
@@ -17,8 +31,7 @@ const SignIn = () => {
           xfbml: true,
           version: "v20.0",
         });
-
-        checkLoginStatus();
+        resolve();
       };
 
       (function (d, s, id) {
@@ -30,11 +43,8 @@ const SignIn = () => {
         js.src = "https://connect.facebook.net/en_US/sdk.js";
         fjs.parentNode.insertBefore(js, fjs);
       })(document, "script", "facebook-jssdk");
-    };
-
-    initFacebookSDK();
-  }, []);
-
+    });
+  };
   const checkLoginStatus = () => {
     if (window.FB) {
       window.FB.getLoginStatus(function (response) {
@@ -53,21 +63,22 @@ const SignIn = () => {
   };
 
   const handleLogin = () => {
-    if (window.FB) {
-      window.FB.login(
-        function (response) {
-          if (response.authResponse) {
-            setIsLoggedIn(true);
-            navigate("/");
-          } else {
-            setError("User cancelled login or did not fully authorize.");
-          }
-        },
-        { scope: "public_profile,email,pages_show_list,pages_read_engagement" }
-      );
-    } else {
-      setError("Facebook SDK not loaded");
+    if (!isFBInitialized) {
+      setError("Facebook SDK not initialized");
+      return;
     }
+
+    window.FB.login(
+      function (response) {
+        if (response.authResponse) {
+          setIsLoggedIn(true);
+          navigate("/");
+        } else {
+          setError("User cancelled login or did not fully authorize.");
+        }
+      },
+      { scope: "public_profile,email,pages_show_list,pages_read_engagement" }
+    );
   };
 
   if (isLoading) {
@@ -88,8 +99,9 @@ const SignIn = () => {
       <button
         onClick={handleLogin}
         className="bg-blue-800 text-white px-4 py-2 rounded-md m-2 shadow-lg"
+        disabled={!isFBInitialized}
       >
-        Login with Facebook{" "}
+        Login with Facebook
       </button>
     </div>
   );
